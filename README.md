@@ -2,6 +2,10 @@
 
 Welcome to the **AI Agents Talking** repository! This project enables interactive conversations between AI agents with memory management using the Groq API. The app is built with Streamlit and features a dynamic, persistent memory to enhance the contextual relevance of conversations. Users can also generate detailed summaries of the conversations.
 
+## Demo
+
+You can try out the live demo of the application here: [AI Agents Talking Demo](https://ai-agents-talking.streamlit.app/)
+
 ## Features
 
 - **Interactive AI Conversations**: Start and observe conversations between AI agents.
