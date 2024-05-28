@@ -1,32 +1,39 @@
 import streamlit as st
-from groq import Groq
+from groq import Groq  # Assuming 'groq' is a fictional library for the purpose of this example
 
 # Initialize the Groq client with a placeholder for the API key
 client = None
 
-# Initialize session state variables for shared memory and dynamic weights
+# Initialize session state variables for memory management
 if 'shared_memory' not in st.session_state:
     st.session_state.shared_memory = []
 
 if 'dynamic_weights' not in st.session_state:
     st.session_state.dynamic_weights = {}
 
-# Function to manage shared memory size
+# Function to manage the size of shared memory
 def manage_memory(new_entry, max_size=20):
+    """Manage the size of shared memory by appending new entries and ensuring it doesn't exceed the max size."""
     if len(st.session_state.shared_memory) >= max_size:
         st.session_state.shared_memory.pop(0)
     st.session_state.shared_memory.append(new_entry)
 
-# Function to get a weighted context from shared memory
+# Function to get a weighted context from shared memory for AI interactions
 def get_weighted_context():
-    sorted_memory = sorted(st.session_state.shared_memory, key=lambda x: sum(st.session_state.dynamic_weights.get(word, 0) for word in x.split()), reverse=True)
+    """Generate a weighted context from shared memory based on dynamic weights assigned to each word."""
+    sorted_memory = sorted(
+        st.session_state.shared_memory,
+        key=lambda x: sum(st.session_state.dynamic_weights.get(word, 0) for word in x.split()),
+        reverse=True
+    )
     return " ".join(sorted_memory[-10:])
 
 # Function to interact with the AI using Groq API
-def interact_with_groq(messages, max_tokens=500):
+def interact_with_groq(messages, model='llama3-70b-8192', max_tokens=500):
+    """Send messages to Groq API and receive AI-generated responses using the selected model."""
     try:
         completion = client.chat.completions.create(
-            model="llama3-70b-8192",
+            model=model,
             messages=messages,
             max_tokens=max_tokens
         )
@@ -46,15 +53,26 @@ def generate_summary(conversation_history):
     messages = [{"role": "system", "content": summary_prompt}]
     return interact_with_groq(messages, max_tokens=1000)
 
-# Streamlit App
+# Streamlit App Setup
 st.title("Interactive AI Conversation with Memory Management")
 
+# Sidebar for API Key input with a link to obtain the key
 st.sidebar.header("Step 1: API Key")
 api_key = st.sidebar.text_input("Enter your Groq API key:", type="password")
+st.sidebar.markdown("[Get your Groq API key here](https://console.groq.com/keys)")
 
 if api_key:
     client = Groq(api_key=api_key)
     st.sidebar.success("API key set successfully!")
+
+    # Model selection dropdown
+    st.sidebar.header("Choose AI Model")
+    model_choice = st.sidebar.selectbox(
+        "Select the model based on your preference:",
+        ('llama3-8b-8192 - Fast', 'llama3-70b-8192 - Smart'),
+        index=1  # Default to the smart model
+    )
+    model = model_choice.split(' - ')[0]
 
     # Step 2: Add a thought to shared memory
     st.sidebar.header("Step 2: Add Thought to Shared Memory")
