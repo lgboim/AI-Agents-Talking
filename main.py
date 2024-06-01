@@ -1,5 +1,5 @@
 import streamlit as st
-from groq import Groq  # Assuming 'groq' is a fictional library for the purpose of this example
+from groq import Groq
 
 # Initialize the Groq client with a placeholder for the API key
 client = None
@@ -13,14 +13,12 @@ if 'dynamic_weights' not in st.session_state:
 
 # Function to manage the size of shared memory
 def manage_memory(new_entry, max_size=20):
-    """Manage the size of shared memory by appending new entries and ensuring it doesn't exceed the max size."""
     if len(st.session_state.shared_memory) >= max_size:
         st.session_state.shared_memory.pop(0)
     st.session_state.shared_memory.append(new_entry)
 
 # Function to get a weighted context from shared memory for AI interactions
 def get_weighted_context():
-    """Generate a weighted context from shared memory based on dynamic weights assigned to each word."""
     sorted_memory = sorted(
         st.session_state.shared_memory,
         key=lambda x: sum(st.session_state.dynamic_weights.get(word, 0) for word in x.split()),
@@ -30,7 +28,6 @@ def get_weighted_context():
 
 # Function to interact with the AI using Groq API
 def interact_with_groq(messages, model='llama3-70b-8192', max_tokens=500):
-    """Send messages to Groq API and receive AI-generated responses using the selected model."""
     try:
         completion = client.chat.completions.create(
             model=model,
@@ -75,89 +72,88 @@ if api_key:
     model = model_choice.split(' - ')[0]
 
     # Step 2: Add a thought to shared memory
-    st.sidebar.header("Step 2: Add Thought to Shared Memory")
-    new_thought = st.sidebar.text_area("Enter your thought:")
+    st.sidebar.header("Step 2: Conversation Settings")
+    new_thought = st.sidebar.text_area("Enter your initial thought:")
+    conversation_type = st.sidebar.selectbox(
+        "Select the type of conversation:",
+        ('Casual Chat', 'Debate', 'Brainstorming Session', 'Teaching Session', 'Storytelling', 'Interview', 'Role-playing', 'Panel Discussion', 'Deep insights')
+    )
+    iterations = st.sidebar.number_input("Enter the number of conversation turns:", min_value=1, max_value=100, value=5)
 
-    if st.sidebar.button("Add Thought"):
+    if st.sidebar.button("Start Conversation"):
         if new_thought:
             manage_memory(new_thought)
-            st.sidebar.success("Thought added to shared memory.")
+            st.sidebar.success("Initial thought added to shared memory.")
         else:
-            st.sidebar.error("Please enter a thought before adding.")
+            st.sidebar.error("Please enter an initial thought before starting the conversation.")
 
-    if st.session_state.shared_memory:
-        st.write("### Shared Memory:")
-        st.write(st.session_state.shared_memory)
+        agent1_output = ""
+        agent2_output = ""
+        conversation_history = ""
 
-        # Step 3: Start a conversation between AI agents
-        st.sidebar.header("Step 3: Conversation Settings")
-        iterations = st.sidebar.number_input("Enter the number of conversation turns:", min_value=1, max_value=100, value=5)
+        for i in range(iterations):
+            st.write(f"## Conversation Turn {i+1}")
 
-        if st.sidebar.button("Start Conversation"):
-            agent1_output = ""
-            agent2_output = ""
-            conversation_history = ""
+            context = get_weighted_context()
 
-            for i in range(iterations):
-                st.write(f"## Conversation Turn {i+1}")
+            # Common prompt for both agents
+            if conversation_type == 'Casual Chat':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nEngage in a casual conversation by sharing an interesting fact or expressing a personal opinion."
+            elif conversation_type == 'Debate':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a debate by presenting a well-researched argument on a controversial topic."
+            elif conversation_type == 'Brainstorming Session':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nContribute to a brainstorming session by proposing a creative solution to a problem or exploring potential ideas for a project."
+            elif conversation_type == 'Teaching Session':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nContribute to a teaching session by explaining a complex concept in a simple and understandable manner."
+            elif conversation_type == 'Storytelling':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a storytelling session by crafting a captivating narrative that engages the listener and leaves them with a thought-provoking message."
+            elif conversation_type == 'Interview':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in an interview by asking insightful questions that reveal interesting facts or perspectives about a person or topic."
+            elif conversation_type == 'Role-playing':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a role-playing session by assuming a character and engaging in a scenario that explores their thoughts, feelings, and actions."
+            elif conversation_type == 'Panel Discussion':
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a panel discussion by presenting a topic and sharing your unique perspective and insights."
+            elif conversation_type == 'Deep insights':
+                custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful."
 
-                context = get_weighted_context()
+            # Agent 1's turn
+            if agent2_output:
+                custom_prompt += f"\n\nAgent 2's previous response: {agent2_output}\n\n"
+            custom_prompt += "\n\nYour response should be thought-provoking, build upon the previous discussion, introduce novel ideas, and encourage critical thinking. Keep it concise yet profound."
+            messages = [{"role": "system", "content": custom_prompt}]
 
-                # Agent 1's turn
-                if agent2_output:
-                    custom_prompt = (
-                        f"Reflect on the previously discussed topics and Agent 2's response. "
-                        f"Compose an insightful short response that delves deeper into the subject matter, offering new perspectives or questions for further investigation. "
-                        f"Consider the following context from shared memory:\n\n{context}\n\n"
-                        f"Agent 2's previous response: {agent2_output}\n\n"
-                        f"Your response should be thought-provoking, build upon the previous discussion, introduce novel ideas, and encourage critical thinking. "
-                        f"Keep it concise yet profound."
-                    )
-                    messages = [{"role": "system", "content": custom_prompt}]
-                else:
-                    messages = [{"role": "system", "content": f"Consider the following context from shared memory:\n\n{context}\n\nStart a conversation by introducing a thought-provoking topic or question."}]
+            agent1_output = interact_with_groq(messages, max_tokens=550)
+            if agent1_output:
+                st.markdown(f"<div style='background-color: #4E4E4E; padding: 10px; border-radius: 5px;'><b>Agent 1:</b><br>{agent1_output}</div>", unsafe_allow_html=True)
+                conversation_history += f"Agent 1: {agent1_output}\n\n"
+                manage_memory(agent1_output)
+                for word in agent1_output.split():
+                    st.session_state.dynamic_weights[word] = st.session_state.dynamic_weights.get(word, 0) + 1
+            else:
+                st.error("No response received from Agent 1.")
+                break
 
-                agent1_output = interact_with_groq(messages, max_tokens=550)
-                if agent1_output:
-                    st.write("### Agent 1:")
-                    st.write(agent1_output)
-                    conversation_history += f"Agent 1: {agent1_output}\n\n"
-                    manage_memory(agent1_output)
-                    for word in agent1_output.split():
-                        st.session_state.dynamic_weights[word] = st.session_state.dynamic_weights.get(word, 0) + 1
-                else:
-                    st.error("No response received from Agent 1.")
-                    break
+            # Agent 2's turn
+            context = get_weighted_context()
+            custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nAgent 1's previous response: {agent1_output}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful."
+            messages = [{"role": "system", "content": custom_prompt}]
 
-                # Agent 2's turn
-                context = get_weighted_context()
-                custom_prompt = (
-                    f"Reflect on Agent 1's response and the previously discussed topics. "
-                    f"Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. "
-                    f"Consider the following context from shared memory:\n\n{context}\n\n"
-                    f"Agent 1's previous response: {agent1_output}\n\n"
-                    f"Your response should enrich the conversation, challenge assumptions, and stimulate further dialogue. "
-                    f"Keep it concise yet impactful."
-                )
-                messages = [{"role": "system", "content": custom_prompt}]
+            agent2_output = interact_with_groq(messages, max_tokens=550)
+            if agent2_output:
+                st.markdown(f"<div style='background-color: #4E4E4E; padding: 10px; border-radius: 5px;'><b>Agent 2:</b><br>{agent2_output}</div>", unsafe_allow_html=True)
+                conversation_history += f"Agent 2: {agent2_output}\n\n"
+                manage_memory(agent2_output)
+                for word in agent2_output.split():
+                    st.session_state.dynamic_weights[word] = st.session_state.dynamic_weights.get(word, 0) + 1
+            else:
+                st.error("No response received from Agent 2.")
+                break
 
-                agent2_output = interact_with_groq(messages, max_tokens=550)
-                if agent2_output:
-                    st.write("### Agent 2:")
-                    st.write(agent2_output)
-                    conversation_history += f"Agent 2: {agent2_output}\n\n"
-                    manage_memory(agent2_output)
-                    for word in agent2_output.split():
-                        st.session_state.dynamic_weights[word] = st.session_state.dynamic_weights.get(word, 0) + 1
-                else:
-                    st.error("No response received from Agent 2.")
-                    break
-
-            # Generate summary after the conversation turns
-            summary = generate_summary(conversation_history)
-            if summary:
-                st.write("## Conversation Summary")
-                st.write(summary)
+        # Generate summary after the conversation turns
+        summary = generate_summary(conversation_history)
+        if summary:
+            st.write("## Conversation Summary")
+            st.write(summary)
 
 else:
     st.sidebar.warning("Please enter your Groq API key to proceed.")
