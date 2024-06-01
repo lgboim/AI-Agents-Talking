@@ -51,10 +51,10 @@ def generate_summary(conversation_history):
     return interact_with_groq(messages, max_tokens=1000)
 
 # Streamlit App Setup
-st.title("Interactive AI Conversation with Memory Management")
+st.title("AI Conversation Simulator")
 
 # Sidebar for API Key input with a link to obtain the key
-st.sidebar.header("Step 1: API Key")
+st.sidebar.header("API Key")
 api_key = st.sidebar.text_input("Enter your Groq API key:", type="password")
 st.sidebar.markdown("[Get your Groq API key here](https://console.groq.com/keys)")
 
@@ -63,7 +63,7 @@ if api_key:
     st.sidebar.success("API key set successfully!")
 
     # Model selection dropdown
-    st.sidebar.header("Choose AI Model")
+    st.sidebar.header("AI Model")
     model_choice = st.sidebar.selectbox(
         "Select the model based on your preference:",
         ('llama3-8b-8192 - Fast', 'llama3-70b-8192 - Smart'),
@@ -72,13 +72,13 @@ if api_key:
     model = model_choice.split(' - ')[0]
 
     # Step 2: Add a thought to shared memory
-    st.sidebar.header("Step 2: Conversation Settings")
+    st.sidebar.header("Conversation Settings")
     new_thought = st.sidebar.text_area("Enter your initial thought:")
     conversation_type = st.sidebar.selectbox(
         "Select the type of conversation:",
-        ('Casual Chat', 'Debate', 'Brainstorming Session', 'Teaching Session', 'Storytelling', 'Interview', 'Role-playing', 'Panel Discussion', 'Deep insights')
+        ('Casual Chat', 'Debate', 'Brainstorming Session', 'Teaching Session', 'Storytelling', 'Interview', 'Role-playing', 'Panel Discussion', 'Deep Insights')
     )
-    iterations = st.sidebar.number_input("Enter the number of conversation turns:", min_value=1, max_value=100, value=5)
+    iterations = st.sidebar.number_input("Number of conversation turns:", min_value=1, max_value=100, value=5)
 
     if st.sidebar.button("Start Conversation"):
         if new_thought:
@@ -113,7 +113,7 @@ if api_key:
                 custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a role-playing session by assuming a character and engaging in a scenario that explores their thoughts, feelings, and actions."
             elif conversation_type == 'Panel Discussion':
                 custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a panel discussion by presenting a topic and sharing your unique perspective and insights."
-            elif conversation_type == 'Deep insights':
+            elif conversation_type == 'Deep Insights':
                 custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful."
 
             # Agent 1's turn
