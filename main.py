@@ -98,28 +98,28 @@ if api_key:
 
             # Common prompt for both agents
             if conversation_type == 'Casual Chat':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nEngage in a casual conversation by sharing an interesting fact or expressing a personal opinion."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nEngage in a casual conversation by sharing an interesting fact or expressing a personal opinion. super short."
             elif conversation_type == 'Debate':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a debate by presenting a well-researched argument on a controversial topic."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a debate by presenting a well-researched argument on a controversial topic. super short."
             elif conversation_type == 'Brainstorming Session':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nContribute to a brainstorming session by proposing a creative solution to a problem or exploring potential ideas for a project."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nContribute to a brainstorming session by proposing a creative solution to a problem or exploring potential ideas for a project. super short."
             elif conversation_type == 'Teaching Session':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nContribute to a teaching session by explaining a complex concept in a simple and understandable manner."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nContribute to a teaching session by explaining a complex concept in a simple and understandable manner. super short."
             elif conversation_type == 'Storytelling':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a storytelling session by crafting a captivating narrative that engages the listener and leaves them with a thought-provoking message."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a storytelling session by crafting a captivating narrative that engages the listener and leaves them with a thought-provoking message. super short."
             elif conversation_type == 'Interview':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in an interview by asking insightful questions that reveal interesting facts or perspectives about a person or topic."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in an interview by asking insightful questions that reveal interesting facts or perspectives about a person or topic. super short."
             elif conversation_type == 'Role-playing':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a role-playing session by assuming a character and engaging in a scenario that explores their thoughts, feelings, and actions."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a role-playing session by assuming a character and engaging in a scenario that explores their thoughts, feelings, and actions. super short."
             elif conversation_type == 'Panel Discussion':
-                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a panel discussion by presenting a topic and sharing your unique perspective and insights."
+                custom_prompt = f"Consider the following context from shared memory:\n\n{context}\n\nParticipate in a panel discussion by presenting a topic and sharing your unique perspective and insights. super short."
             elif conversation_type == 'Deep Insights':
-                custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful."
+                custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful. super short."
 
             # Agent 1's turn
             if agent2_output:
                 custom_prompt += f"\n\nAgent 2's previous response: {agent2_output}\n\n"
-            custom_prompt += "\n\nYour response should be thought-provoking, build upon the previous discussion, introduce novel ideas, and encourage critical thinking. Keep it concise yet profound."
+            custom_prompt += "\n\nYour response should be thought-provoking, build upon the previous discussion, introduce novel ideas, and encourage critical thinking. Keep it concise yet profound. super short."
             messages = [{"role": "system", "content": custom_prompt}]
 
             agent1_output = interact_with_groq(messages, max_tokens=550)
@@ -135,7 +135,7 @@ if api_key:
 
             # Agent 2's turn
             context = get_weighted_context()
-            custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nAgent 1's previous response: {agent1_output}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful."
+            custom_prompt = f"Reflect on Agent 1's response and the previously discussed topics. Compose a thoughtful short response that builds upon the conversation, offering new insights or posing intriguing questions. Consider the following context from shared memory:\n\n{context}\n\nAgent 1's previous response: {agent1_output}\n\nYour response should enrich the conversation, challenge assumptions, and stimulate further dialogue. Keep it concise yet impactful. super short."
             messages = [{"role": "system", "content": custom_prompt}]
 
             agent2_output = interact_with_groq(messages, max_tokens=550)
